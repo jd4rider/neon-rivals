@@ -26,15 +26,17 @@ export class TouchPad {
   }
 
   private build(): void {
-    this.makeButton('left', 96, 646, 88, '\u25C0', 0x3f8dff)
-    this.makeButton('right', 198, 646, 88, '\u25B6', 0x3f8dff)
-    this.makeButton('jump', 96, 546, 82, 'JUMP', 0x2fe6a0, 15)
-    this.makeButton('crouch', 198, 546, 82, 'DUCK', 0x2fe6a0, 15)
+    // Radius, not diameter: 46 leaves a small gap between neighbouring
+    // buttons and keeps every target comfortably above 44 CSS px on a phone.
+    this.makeButton('left', 96, 646, 46, '\u25C0', 0x3f8dff)
+    this.makeButton('right', 198, 646, 46, '\u25B6', 0x3f8dff)
+    this.makeButton('jump', 96, 546, 42, 'JUMP', 0x2fe6a0, 11)
+    this.makeButton('crouch', 198, 546, 42, 'DUCK', 0x2fe6a0, 11)
 
-    this.makeButton('light', 1002, 546, 88, 'LIGHT', 0x4df3ff, 14)
-    this.makeButton('heavy', 1104, 546, 88, 'HEAVY', 0xff3ea5, 14)
-    this.makeButton('special', 1002, 646, 88, 'SPECIAL', 0xffc247, 13)
-    this.makeButton('guard', 1104, 646, 88, 'GUARD', 0xb07dff, 14)
+    this.makeButton('light', 1002, 546, 46, 'LIGHT', 0x4df3ff, 11)
+    this.makeButton('heavy', 1104, 546, 46, 'HEAVY', 0xff3ea5, 11)
+    this.makeButton('special', 1002, 646, 46, 'SPECIAL', 0xffc247, 10)
+    this.makeButton('guard', 1104, 646, 46, 'GUARD', 0xb07dff, 11)
   }
 
   private makeButton(
