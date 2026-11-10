@@ -1,7 +1,7 @@
 {
   "name": "neon-rivals",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "description": "Neon Rivals \u2014 a landscape-only neon fighting game for Little Joy Arcade.",
   "author": "jd4rider",

@@ -2,6 +2,7 @@ import Phaser from 'phaser'
 import { STAGE } from '../game/engine'
 import { mulberry32 } from '../game/random'
 import type { Arena } from '../game/types'
+import { stageLeft, stageRight, stageWidth } from './stage'
 import { display, label } from './ui'
 
 interface Building {
@@ -69,10 +70,12 @@ export class ArenaBackdrop {
 
   private paintSky(g: Phaser.GameObjects.Graphics): void {
     const arena = this.arena
+    const left = stageLeft()
+    const width = stageWidth()
     g.fillStyle(arena.skyBottom, 1)
-    g.fillRect(0, 0, STAGE.width, STAGE.height)
+    g.fillRect(left, 0, width, STAGE.height)
     g.fillGradientStyle(arena.skyTop, arena.skyTop, arena.skyBottom, arena.skyBottom, 1)
-    g.fillRect(0, 0, STAGE.width, STAGE.groundY + 10)
+    g.fillRect(left, 0, width, STAGE.groundY + 10)
 
     // Horizon bloom.
     g.fillStyle(arena.accent, 0.07)
@@ -110,7 +113,7 @@ export class ArenaBackdrop {
     // Stars.
     g.fillStyle(0xffffff, 0.5)
     for (let index = 0; index < 46; index += 1) {
-      const x = this.random() * STAGE.width
+      const x = left + this.random() * width
       const y = this.random() * 300
       const radius = this.random() < 0.2 ? 1.7 : 1
       g.fillCircle(x, y, radius)
@@ -120,8 +123,8 @@ export class ArenaBackdrop {
   private makeBuildings(): Building[] {
     const arena = this.arena
     const buildings: Building[] = []
-    let x = -30
-    while (x < STAGE.width + 40) {
+    let x = stageLeft() - 40
+    while (x < stageRight() + 40) {
       const width = 52 + this.random() * 84
       const height = 110 + this.random() * 250
       const lights: Building['lights'] = []
@@ -180,15 +183,15 @@ export class ArenaBackdrop {
 
     // Haze at the base of the skyline.
     g.fillGradientStyle(0x05030f, 0x05030f, this.arena.skyTop, this.arena.skyTop, 1)
-    g.fillRect(0, STAGE.groundY - 110, STAGE.width, 110)
+    g.fillRect(stageLeft(), STAGE.groundY - 110, stageWidth(), 110)
     g.fillStyle(0x05030f, 0.35)
-    g.fillRect(0, STAGE.groundY - 110, STAGE.width, 110)
+    g.fillRect(stageLeft(), STAGE.groundY - 110, stageWidth(), 110)
   }
 
   private buildTraffic(): void {
     if (this.arena.style !== 'circuit') return
     for (let index = 0; index < 7; index += 1) {
-      const x = this.random() * STAGE.width
+      const x = stageLeft() + this.random() * stageWidth()
       const y = 90 + this.random() * 200
       const streak = this.scene.add.graphics()
       const color = index % 2 === 0 ? this.arena.accent : this.arena.accent2
@@ -205,7 +208,7 @@ export class ArenaBackdrop {
         repeat: -1,
         delay: this.random() * 2600,
         onRepeat: () => {
-          car.x = -80 - this.random() * 200
+          car.x = stageLeft() - 80 - this.random() * 200
         },
         ease: 'Linear',
       })
@@ -217,7 +220,13 @@ export class ArenaBackdrop {
     const accent = this.arena.accent
     for (let index = 0; index < 16; index += 1) {
       const size = 1.4 + this.random() * 2.6
-      const mote = this.scene.add.circle(this.random() * STAGE.width, 200 + this.random() * 430, size, accent, 0.35)
+      const mote = this.scene.add.circle(
+        stageLeft() + this.random() * stageWidth(),
+        200 + this.random() * 430,
+        size,
+        accent,
+        0.35,
+      )
       mote.setBlendMode(Phaser.BlendModes.ADD)
       this.container.add(mote)
       this.scene.tweens.add({
@@ -251,24 +260,26 @@ export class ArenaBackdrop {
 
   private paintFrame(): void {
     const g = this.scene.add.graphics().setDepth(60)
+    const left = stageLeft()
+    const right = stageRight()
     g.fillStyle(0x05030f, 0.55)
-    g.fillRect(0, STAGE.groundY - 2, STAGE.width, 3)
+    g.fillRect(left, STAGE.groundY - 2, stageWidth(), 3)
     g.lineStyle(2, this.arena.accent, 0.22)
-    g.lineBetween(0, STAGE.groundY - 2, STAGE.width, STAGE.groundY - 2)
+    g.lineBetween(left, STAGE.groundY - 2, right, STAGE.groundY - 2)
 
     // Vignette.
     g.fillGradientStyle(0x000000, 0x000000, 0x000000, 0x000000, 0.42, 0, 0, 0)
-    g.fillRect(0, 0, STAGE.width, 150)
+    g.fillRect(left, 0, stageWidth(), 150)
     g.fillGradientStyle(0x000000, 0x000000, 0x000000, 0x000000, 0, 0, 0.5, 0.5)
-    g.fillRect(0, STAGE.height - 110, STAGE.width, 110)
+    g.fillRect(left, STAGE.height - 110, stageWidth(), 110)
     g.fillGradientStyle(0x000000, 0x000000, 0x000000, 0x000000, 0.35, 0, 0.35, 0)
-    g.fillRect(0, 0, 120, STAGE.height)
+    g.fillRect(left, 0, 120, STAGE.height)
     g.fillGradientStyle(0x000000, 0x000000, 0x000000, 0x000000, 0, 0.35, 0, 0.35)
-    g.fillRect(STAGE.width - 120, 0, 120, STAGE.height)
+    g.fillRect(right - 120, 0, 120, STAGE.height)
 
     // Scanlines, very faint.
     g.lineStyle(1, 0xffffff, 0.016)
-    for (let y = 0; y < STAGE.height; y += 4) g.lineBetween(0, y, STAGE.width, y)
+    for (let y = 0; y < STAGE.height; y += 4) g.lineBetween(left, y, right, y)
     this.container.add(g)
   }
 
@@ -277,10 +288,12 @@ export class ArenaBackdrop {
     const g = this.floor
     g.clear()
 
+    const left = stageLeft()
+    const right = stageRight()
     g.fillStyle(arena.floor, 1)
-    g.fillRect(0, STAGE.groundY, STAGE.width, STAGE.height - STAGE.groundY)
+    g.fillRect(left, STAGE.groundY, stageWidth(), STAGE.height - STAGE.groundY)
     g.fillGradientStyle(arena.accent, arena.accent, arena.floor, arena.floor, 0.14, 0.14, 0.9, 0.9)
-    g.fillRect(0, STAGE.groundY, STAGE.width, STAGE.height - STAGE.groundY)
+    g.fillRect(left, STAGE.groundY, stageWidth(), STAGE.height - STAGE.groundY)
 
     // Reflection of the horizon.
     g.fillStyle(arena.accent2, 0.08)
@@ -289,7 +302,8 @@ export class ArenaBackdrop {
     // Perspective grid.
     const vanishX = STAGE.width / 2
     g.lineStyle(1.5, arena.accent, 0.14)
-    for (let column = -10; column <= 10; column += 1) {
+    const spread = Math.ceil(stageWidth() / 2 / 118) + 1
+    for (let column = -spread; column <= spread; column += 1) {
       g.lineBetween(vanishX + column * 32, STAGE.groundY, vanishX + column * 118, STAGE.height)
     }
     const scroll = (time / 26) % 44
@@ -297,7 +311,7 @@ export class ArenaBackdrop {
       const t = (row * 44 + scroll) / (5 * 44)
       const y = STAGE.groundY + Math.pow(t, 1.7) * (STAGE.height - STAGE.groundY)
       g.lineStyle(1.5, arena.accent, 0.08 + t * 0.14)
-      g.lineBetween(0, y, STAGE.width, y)
+      g.lineBetween(left, y, right, y)
     }
 
     // Flickering windows and signs on a quantised clock, so it stays cheap.

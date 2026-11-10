@@ -5,7 +5,7 @@
   "description": "A landscape-only neon arcade fighter. Pick one of four rivals, then punch, launch and projectile your way through a three-fight arcade ladder or a single quick match. Combat runs on a deterministic 60 Hz engine with light and heavy attacks, a meter-fed special, dedicated guard with chip damage, combo scaling, projectile clashes, KO and timeout rounds. Full keyboard bindings work out of the box on PC, standard gamepads are supported through the browser's Gamepad API with rumble on impact, and a landscape touch pad covers phones. Neon Rivals refuses to squeeze into portrait: a polished rotation gate covers the screen, pauses the match exactly where it stands, and resumes with a countdown when the phone turns. Progress, records and settings save locally and sync through a Little Joy Arcade account when signed in.",
   "categories": ["Arcade", "Casual"],
   "runtime": "Phaser 3",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "updated": "2026-11-10",
   "status": "live",
   "featured": true,

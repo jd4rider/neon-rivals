@@ -36,6 +36,12 @@ body {
   touch-action: none;
 }
 
+/* The arcade client's account bubble is pinned to the bottom-left corner, on
+   top of the movement pad. Keep it on the menus, hide it during a fight. */
+body.nr-fighting [data-lja-client] {
+  display: none !important;
+}
+
 /* -------------------------------------------------------------------------
    Landscape gate
    ------------------------------------------------------------------------- */

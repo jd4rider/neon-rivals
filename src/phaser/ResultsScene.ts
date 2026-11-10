@@ -3,6 +3,7 @@ import { sound } from '../core/audio'
 import { ARENAS, CHARACTERS, ladderFor } from '../game/roster'
 import type { Difficulty } from '../game/types'
 import { ArenaBackdrop } from './ArenaBackdrop'
+import { applyStage } from './stage'
 import { FighterView } from './FighterView'
 import { button, display, fadeTo, formatSeconds, hex, label, panel } from './ui'
 
@@ -38,6 +39,7 @@ export class ResultsScene extends Phaser.Scene {
   }
 
   create(): void {
+    applyStage(this)
     this.backdrop = new ArenaBackdrop(this, ARENAS.find((arena) => arena.id === this.result.arena) ?? ARENAS[0]!)
     this.backdrop.container.setAlpha(0.6).setDepth(-10)
     this.cameras.main.fadeIn(260, 5, 3, 15)

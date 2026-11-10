@@ -5,6 +5,7 @@ import { currentSave, resetSave, updateSettings, type TouchPadMode } from '../co
 import { ARENAS, DIFFICULTY_ORDER, DIFFICULTY_PRESETS } from '../game/roster'
 import type { Difficulty } from '../game/types'
 import { ArenaBackdrop } from './ArenaBackdrop'
+import { applyStage } from './stage'
 import { backButton, button, display, fadeTo, label, panel, toast } from './ui'
 
 interface OptionsData {
@@ -34,6 +35,7 @@ export class OptionsScene extends Phaser.Scene {
   }
 
   create(): void {
+    applyStage(this)
     this.difficultyPills = []
     this.roundPills = []
     this.touchPills = []

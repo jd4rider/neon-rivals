@@ -5,6 +5,7 @@ import { ARENAS, CHARACTERS } from '../game/roster'
 import type { Character } from '../game/types'
 import { ArenaBackdrop } from './ArenaBackdrop'
 import { FighterView, idlePose } from './FighterView'
+import { applyStage, stageWidth } from './stage'
 import { attachMenuKeys, button, display, fadeIn, fadeTo, hex, label, panel, type MenuButton } from './ui'
 
 export class TitleScene extends Phaser.Scene {
@@ -19,6 +20,7 @@ export class TitleScene extends Phaser.Scene {
   }
 
   create(): void {
+    applyStage(this)
     this.backdrop = new ArenaBackdrop(this, ARENAS[0]!)
     this.backdrop.container.setDepth(-10)
     fadeIn(this)
@@ -190,7 +192,7 @@ export class TitleScene extends Phaser.Scene {
       connected ? '#b07dff' : '#6d82a7',
       { origin: 0.5, letterSpacing: 1.4 },
     ).setDepth(14)
-    label(this, 1234, 14, 'v1.0.0  ·  LITTLE JOY ARCADE', 10, '#5f7194', {
+    label(this, 1234, 14, 'v1.0.1  ·  LITTLE JOY ARCADE', 10, '#5f7194', {
       origin: [1, 0],
       letterSpacing: 1.5,
     }).setDepth(14)
@@ -204,7 +206,7 @@ export class TitleScene extends Phaser.Scene {
   private openControls(): void {
     if (this.modal) return
     const container = this.add.container(0, 0).setDepth(5000)
-    container.add(this.add.rectangle(640, 360, 1280, 720, 0x05030f, 0.84).setInteractive())
+    container.add(this.add.rectangle(640, 360, stageWidth(), 720, 0x05030f, 0.84).setInteractive())
     container.add(
       panel(this, 250, 92, 780, 536, { fill: 0x0b1026, stroke: 0x4df3ff, strokeAlpha: 0.35, glow: true }),
     )

@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import { NO_INPUT, type InputFrame } from '../game/types'
+import { stageBleed } from './stage'
 import { darken, display, hex, label } from './ui'
 
 type Action = keyof InputFrame
@@ -9,12 +10,17 @@ type Action = keyof InputFrame
  * action buttons under the right. Multi-touch is required (move + jump +
  * attack at once), so every button captures its own pointer and the pad never
  * steals input from the other side.
+ *
+ * The clusters are pinned to the real screen edges, not to the 1280 design, so
+ * on a wide phone the thumbs still land where they naturally rest.
  */
 export class TouchPad {
   readonly container: Phaser.GameObjects.Container
   private readonly scene: Phaser.Scene
   private readonly held = new Set<Action>()
   private readonly pressed = new Set<Action>()
+  private readonly painters = new Map<Action, (pressed: boolean) => void>()
+  private readonly buttons = new Map<Action, Phaser.GameObjects.Container>()
   private opacity = 0.55
 
   constructor(scene: Phaser.Scene, opacity: number) {
@@ -23,20 +29,31 @@ export class TouchPad {
     this.container.setAlpha(opacity)
     this.opacity = opacity
     this.build()
+
+    // A finger can lift outside its button (or outside the canvas). Without
+    // this the action would stay held forever and the fighter would keep
+    // walking into the wall.
+    scene.input.on('pointerup', this.releaseAll)
+    scene.input.on('gameout', this.releaseAll)
+    scene.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      scene.input.off('pointerup', this.releaseAll)
+      scene.input.off('gameout', this.releaseAll)
+    })
   }
 
   private build(): void {
+    const bleed = stageBleed()
     // Radius, not diameter: 46 leaves a small gap between neighbouring
     // buttons and keeps every target comfortably above 44 CSS px on a phone.
-    this.makeButton('left', 96, 646, 46, '\u25C0', 0x3f8dff)
-    this.makeButton('right', 198, 646, 46, '\u25B6', 0x3f8dff)
-    this.makeButton('jump', 96, 546, 42, 'JUMP', 0x2fe6a0, 11)
-    this.makeButton('crouch', 198, 546, 42, 'DUCK', 0x2fe6a0, 11)
+    this.makeButton('left', 96 - bleed, 646, 46, '\u25C0', 0x3f8dff)
+    this.makeButton('right', 198 - bleed, 646, 46, '\u25B6', 0x3f8dff)
+    this.makeButton('jump', 96 - bleed, 546, 42, 'JUMP', 0x2fe6a0, 11)
+    this.makeButton('crouch', 198 - bleed, 546, 42, 'DUCK', 0x2fe6a0, 11)
 
-    this.makeButton('light', 1002, 546, 46, 'LIGHT', 0x4df3ff, 11)
-    this.makeButton('heavy', 1104, 546, 46, 'HEAVY', 0xff3ea5, 11)
-    this.makeButton('special', 1002, 646, 46, 'SPECIAL', 0xffc247, 10)
-    this.makeButton('guard', 1104, 646, 46, 'GUARD', 0xb07dff, 11)
+    this.makeButton('light', 1002 + bleed, 546, 46, 'LIGHT', 0x4df3ff, 11)
+    this.makeButton('heavy', 1104 + bleed, 546, 46, 'HEAVY', 0xff3ea5, 11)
+    this.makeButton('special', 1002 + bleed, 646, 46, 'SPECIAL', 0xffc247, 10)
+    this.makeButton('guard', 1104 + bleed, 646, 46, 'GUARD', 0xb07dff, 11)
   }
 
   private makeButton(
@@ -66,6 +83,8 @@ export class TouchPad {
       graphics.fillEllipse(0, -r * 0.34, r * 1.3, r * 0.6)
     }
     paint(false)
+    this.painters.set(action, paint)
+    this.buttons.set(action, container)
     container.add(graphics)
 
     const content = display(this.scene, 0, 0, text, fontSize, '#f4f9ff')
@@ -101,6 +120,15 @@ export class TouchPad {
     hit.on('pointerupoutside', release)
   }
 
+  private readonly releaseAll = (): void => {
+    if (this.held.size === 0 && this.pressed.size === 0) return
+    for (const action of this.held) this.painters.get(action)?.(false)
+    for (const action of this.pressed) this.painters.get(action)?.(false)
+    for (const action of this.held) this.buttons.get(action)?.setScale(1)
+    this.held.clear()
+    this.pressed.clear()
+  }
+
   sample(): InputFrame {
     const frame: InputFrame = { ...NO_INPUT }
     for (const action of this.held) {
@@ -122,10 +150,14 @@ export class TouchPad {
   }
 
   setVisible(visible: boolean): void {
+    if (!visible) this.releaseAll()
     this.container.setVisible(visible)
   }
 
   destroy(): void {
+    this.releaseAll()
+    this.scene.input.off('pointerup', this.releaseAll)
+    this.scene.input.off('gameout', this.releaseAll)
     this.container.destroy(true)
   }
 }

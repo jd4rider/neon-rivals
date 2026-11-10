@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import { sound } from '../core/audio'
+import { DESIGN } from './stage'
 
 export const FONT = '"Inter", "Segoe UI", system-ui, -apple-system, sans-serif'
 export const DISPLAY = '"Arial Black", "Archivo Black", Impact, sans-serif'
@@ -322,8 +323,8 @@ export function fadeIn(scene: Phaser.Scene): void {
 }
 
 export function toast(scene: Phaser.Scene, message: string, accent = 0x4df3ff, y = 118): void {
-  const width = Math.min(620, scene.scale.width - 80)
-  const container = scene.add.container(scene.scale.width / 2, y).setDepth(6000)
+  const width = Math.min(620, DESIGN.width - 80)
+  const container = scene.add.container(DESIGN.width / 2, y).setDepth(6000)
   const card = panel(scene, -width / 2, 0, width, 50, {
     fill: 0x0b1026,
     radius: 14,

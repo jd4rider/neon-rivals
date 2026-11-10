@@ -368,6 +368,37 @@ describe('CPU opponent', () => {
     expect(engine.p1.health).toBeLessThan(engine.p1.maxHealth)
   })
 
+  it('swings from the edge of its reach instead of walking away or freezing', () => {
+    const engine = newMatch()
+    skipIntro(engine)
+    const cpu = new CpuController('fighter', 3)
+    engine.p1.x = 500
+    engine.cpu.x = 617
+    let attacks = 0
+    let walked = 0
+    for (let index = 0; index < 120; index += 1) {
+      const frame = cpu.decide(engine.cpu, engine.p1)
+      if (frame.light || frame.heavy || frame.special) attacks += 1
+      if (frame.left || frame.right) walked += 1
+    }
+    expect(attacks).toBeGreaterThanOrEqual(2)
+    expect(walked).toBe(0)
+  })
+
+  it('keeps applying pressure instead of stalling out of range', () => {
+    const engine = newMatch({ difficulty: 'fighter' })
+    const cpu = new CpuController('fighter', 3)
+    skipIntro(engine)
+    let attacks = 0
+    for (let index = 0; index < 1800; index += 1) {
+      const before = engine.cpu.attack
+      engine.step({ p1: idle(), cpu: cpu.decide(engine.cpu, engine.p1) })
+      if (!before && engine.cpu.attack) attacks += 1
+    }
+    expect(attacks).toBeGreaterThan(8)
+    expect(engine.stats.cpuHits).toBeGreaterThan(2)
+  })
+
   it('never touches the player object and never exceeds valid input', () => {
     const engine = newMatch()
     const cpu = new CpuController('master', 12)

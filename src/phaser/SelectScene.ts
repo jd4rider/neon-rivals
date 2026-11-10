@@ -4,6 +4,7 @@ import { currentSave, updateSettings } from '../core/saves'
 import { ARENAS, CHARACTERS, DIFFICULTY_ORDER, DIFFICULTY_PRESETS, ladderFor } from '../game/roster'
 import type { Difficulty } from '../game/types'
 import { ArenaBackdrop } from './ArenaBackdrop'
+import { applyStage } from './stage'
 import { FighterView, idlePose } from './FighterView'
 import {
   attachMenuKeys,
@@ -51,6 +52,7 @@ export class SelectScene extends Phaser.Scene {
   }
 
   create(): void {
+    applyStage(this)
     const save = currentSave()
     this.difficulty = save.settings.difficulty
     this.rounds = save.settings.rounds

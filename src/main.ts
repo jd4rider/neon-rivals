@@ -8,6 +8,7 @@ import { OptionsScene } from './phaser/OptionsScene'
 import { ResultsScene } from './phaser/ResultsScene'
 import { SelectScene } from './phaser/SelectScene'
 import { TitleScene } from './phaser/TitleScene'
+import { baseWidthFor, DESIGN, setStageBleed } from './phaser/stage'
 
 declare global {
   interface Window {
@@ -15,17 +16,21 @@ declare global {
   }
 }
 
+// The logical stage follows the real viewport aspect (16:9 up to 2.8:1) so the
+// game fills a wide phone sideways instead of sitting in a 16:9 pillarbox. The
+// 1280x720 design stays centred and the extra width is drawn by the backdrop.
+const initialWidth = baseWidthFor({ width: window.innerWidth, height: window.innerHeight })
+setStageBleed((initialWidth - DESIGN.width) / 2)
+
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   parent: 'game',
   backgroundColor: '#05030f',
-  // FIT keeps the 16:9 logical stage intact at every size: nothing is squashed
-  // or stretched, the browser letterboxes instead.
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
-    width: 1280,
-    height: 720,
+    width: initialWidth,
+    height: DESIGN.height,
   },
   render: {
     antialias: true,
@@ -72,6 +77,11 @@ const refreshScale = (): void => {
   if (refreshTimer !== null) window.clearTimeout(refreshTimer)
   refreshTimer = window.setTimeout(() => {
     refreshTimer = null
+    const width = baseWidthFor({ width: window.innerWidth, height: window.innerHeight })
+    setStageBleed((width - DESIGN.width) / 2)
+    if (game.scale.gameSize.width !== width || game.scale.gameSize.height !== DESIGN.height) {
+      game.scale.setGameSize(width, DESIGN.height)
+    }
     game.scale.refresh()
   }, 80)
 }

@@ -8,12 +8,25 @@ import { NO_INPUT, type Difficulty, type InputFrame } from './types'
  * a human could: no health bonuses, no extra damage, no hidden reads. The
  * difficulty knob changes reaction speed, blocking and how often it commits.
  */
+
+/**
+ * One reach value for both walking in and swinging. Two different numbers here
+ * used to leave a dead band where the CPU stopped closing the gap *and* was
+ * still out of range, so it stood still for the rest of the round.
+ */
+const ATTACK_RANGE = 122
+/** Close enough to hit with the widest normals; the CPU never stalls this far in. */
+const WALK_IN_RANGE = 150
+/** Safety valve: if it has not thrown anything for this long, it swings. */
+const PRESSURE_TICKS = 80
+
 export class CpuController {
   private readonly preset
   private readonly rng: () => number
   private cooldown = 14
   private guardTicks = 0
   private jumpCooldown = 60
+  private sinceAttack = 0
 
   constructor(difficulty: Difficulty, seed = 7) {
     this.preset = DIFFICULTY_PRESETS[difficulty]
@@ -24,12 +37,14 @@ export class CpuController {
     this.cooldown = 20
     this.guardTicks = 0
     this.jumpCooldown = 60
+    this.sinceAttack = 0
   }
 
   decide(self: FighterRuntime, foe: FighterRuntime): InputFrame {
     const input: InputFrame = { ...NO_INPUT }
     this.cooldown -= 1
     this.jumpCooldown -= 1
+    this.sinceAttack += 1
 
     if (self.state === 'ko') return input
 
@@ -55,11 +70,16 @@ export class CpuController {
       return input
     }
 
-    if (distance > 118) input[toward] = true
-    else if (distance < 72 && this.rng() < 0.03) input[away] = true
+    // Close the gap until it is genuinely inside swinging range, then stay
+    // there. The order matters: walk first, decide to attack second.
+    if (distance > ATTACK_RANGE) {
+      input[toward] = true
+    } else if (distance < 58 && this.rng() < 0.04) {
+      input[away] = true
+    }
 
     if (
-      distance > 150 &&
+      distance > WALK_IN_RANGE &&
       this.jumpCooldown <= 0 &&
       this.rng() < this.preset.jumpChance &&
       !self.attack
@@ -68,24 +88,25 @@ export class CpuController {
       this.jumpCooldown = 100
     }
 
-    if (!self.grounded && distance < 140 && !self.attack && this.rng() < 0.18) {
+    if (!self.grounded && distance < ATTACK_RANGE + 24 && !self.attack && this.rng() < 0.18) {
       input.heavy = true
       this.cooldown = this.preset.reaction
+      this.sinceAttack = 0
       return input
     }
 
-    if (this.cooldown > 0) return input
+    if (this.cooldown > 0 && this.sinceAttack < PRESSURE_TICKS) return input
 
-    if (distance < 116) {
+    if (distance <= ATTACK_RANGE) {
       const roll = this.rng()
       const canSpecial = self.meter >= self.character.special.meterCost
-      let choice: 'light' | 'heavy' | 'special' =
-        roll < 0.58 ? 'light' : roll < 0.88 ? 'heavy' : 'special'
+      let choice: 'light' | 'heavy' | 'special' = roll < 0.58 ? 'light' : roll < 0.88 ? 'heavy' : 'special'
       if (choice === 'special' && (!canSpecial || this.rng() > this.preset.specialChance)) {
         choice = this.rng() < 0.7 ? 'light' : 'heavy'
       }
       input[choice] = true
       this.cooldown = Math.max(5, Math.round(this.preset.reaction * (0.55 + this.rng() * 0.8)))
+      this.sinceAttack = 0
       return input
     }
 
@@ -96,6 +117,7 @@ export class CpuController {
     ) {
       input.special = true
       this.cooldown = this.preset.reaction
+      this.sinceAttack = 0
     }
 
     return input

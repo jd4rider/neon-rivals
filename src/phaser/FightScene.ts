@@ -9,6 +9,7 @@ import { ladderFor } from '../game/roster'
 import type { Difficulty } from '../game/types'
 import { ArenaBackdrop } from './ArenaBackdrop'
 import { FighterView } from './FighterView'
+import { applyStage, stageBleed, stageWidth } from './stage'
 import { TouchPad } from './TouchPad'
 import { button, display, hex, label, panel, toast } from './ui'
 import type { ResultsData } from './ResultsScene'
@@ -89,6 +90,11 @@ export class FightScene extends Phaser.Scene {
   }
 
   create(): void {
+    applyStage(this)
+    // The Little Joy account bubble is fixed to the bottom-left corner, which
+    // is exactly where the movement pad lives. It stays on the menus, but it
+    // must never sit over the controls mid-fight.
+    document.body.classList.add('nr-fighting')
     this.settings = currentSave().settings
     this.mode = 'running'
     this.blocked = OrientationManager.current?.isBlocked ?? false
@@ -214,7 +220,15 @@ export class FightScene extends Phaser.Scene {
   }
 
   private stepSimulation(): void {
+    // Touch, keyboard and gamepad all feed the same frame. The pad used to be
+    // drawn but never sampled, which is why its buttons did nothing.
     const p1 = this.playerInput.sample()
+    const touch = this.pad?.sample()
+    if (touch) {
+      for (const action of Object.keys(p1) as Array<keyof typeof p1>) {
+        if (touch[action]) p1[action] = true
+      }
+    }
     const cpu = this.cpu.decide(this.engine.cpu, this.engine.p1)
     this.engine.step({ p1, cpu })
     for (const event of this.engine.drainEvents()) {
@@ -267,9 +281,12 @@ export class FightScene extends Phaser.Scene {
     const p1 = this.engine.p1.character
     const cpu = this.engine.cpu.character
 
-    this.p1NameText = label(this, 44, 10, p1.name, 16, '#ffffff', { fontStyle: 'bold', letterSpacing: 2 })
+    this.p1NameText = label(this, 44 - stageBleed(), 10, p1.name, 16, '#ffffff', {
+      fontStyle: 'bold',
+      letterSpacing: 2,
+    })
     this.p1NameText.setDepth(31)
-    this.cpuNameText = label(this, 1236, 10, cpu.name, 16, '#ffffff', {
+    this.cpuNameText = label(this, 1236 + stageBleed(), 10, cpu.name, 16, '#ffffff', {
       origin: [1, 0],
       fontStyle: 'bold',
       letterSpacing: 2,
@@ -279,9 +296,9 @@ export class FightScene extends Phaser.Scene {
     this.timerText = display(this, 640, 42, '60', 38, '#ffffff')
     this.timerText.setDepth(31).setStroke('#05030f', 6)
 
-    this.comboP1Text = display(this, 330, 206, '', 24, hex(p1.colors.accent))
+    this.comboP1Text = display(this, 330 - stageBleed(), 206, '', 24, hex(p1.colors.accent))
     this.comboP1Text.setDepth(31).setAlpha(0)
-    this.comboCpuText = display(this, 950, 206, '', 24, hex(cpu.colors.accent))
+    this.comboCpuText = display(this, 950 + stageBleed(), 206, '', 24, hex(cpu.colors.accent))
     this.comboCpuText.setDepth(31).setAlpha(0)
 
     this.bannerText = display(this, 640, 296, '', 84, '#ffffff')
@@ -320,6 +337,18 @@ export class FightScene extends Phaser.Scene {
     const pauseHit = this.add.rectangle(0, 0, 100, 34, 0xffffff, 0.001).setInteractive({ useHandCursor: true })
     pause.add(pauseHit)
     pauseHit.on('pointerup', () => this.togglePause())
+
+    // HUD text is pinned to the screen edges, so it has to move when the stage
+    // is re-sized (a phone rotating into landscape, a window being dragged).
+    this.scale.on(Phaser.Scale.Events.RESIZE, this.layoutHud, this)
+  }
+
+  private layoutHud(): void {
+    const bleed = stageBleed()
+    this.p1NameText?.setPosition(44 - bleed, 10)
+    this.cpuNameText?.setPosition(1236 + bleed, 10)
+    this.comboP1Text?.setPosition(330 - bleed, 206)
+    this.comboCpuText?.setPosition(950 + bleed, 206)
   }
 
   private drawHud(): void {
@@ -331,20 +360,23 @@ export class FightScene extends Phaser.Scene {
     this.healthP1 += (p1Ratio - this.healthP1) * 0.16
     this.healthCpu += (cpuRatio - this.healthCpu) * 0.16
 
-    this.drawBar(g, 44, 42, 470, 26, p1Ratio, this.healthP1, engine.p1.character.colors.primary, false)
-    this.drawBar(g, 766, 42, 470, 26, cpuRatio, this.healthCpu, engine.cpu.character.colors.primary, true)
+    const bleed = stageBleed()
+    const left = 44 - bleed
+    const right = 1236 + bleed
+    this.drawBar(g, left, 42, 470, 26, p1Ratio, this.healthP1, engine.p1.character.colors.primary, false)
+    this.drawBar(g, right - 470, 42, 470, 26, cpuRatio, this.healthCpu, engine.cpu.character.colors.primary, true)
 
     // Meter gauges.
     const p1Meter = clamp01(engine.p1.meter / 100)
     const cpuMeter = clamp01(engine.cpu.meter / 100)
     g.fillStyle(0xffffff, 0.1)
-    g.fillRoundedRect(44, 76, 230, 9, 4.5)
+    g.fillRoundedRect(left, 76, 230, 9, 4.5)
     g.fillStyle(p1Meter >= 1 ? 0xffc247 : engine.p1.character.colors.accent, 0.95)
-    g.fillRoundedRect(44, 76, Math.max(5, 230 * p1Meter), 9, 4.5)
+    g.fillRoundedRect(left, 76, Math.max(5, 230 * p1Meter), 9, 4.5)
     g.fillStyle(0xffffff, 0.1)
-    g.fillRoundedRect(1006, 76, 230, 9, 4.5)
+    g.fillRoundedRect(right - 230, 76, 230, 9, 4.5)
     g.fillStyle(cpuMeter >= 1 ? 0xffc247 : engine.cpu.character.colors.accent, 0.95)
-    g.fillRoundedRect(1236 - Math.max(5, 230 * cpuMeter), 76, Math.max(5, 230 * cpuMeter), 9, 4.5)
+    g.fillRoundedRect(right - Math.max(5, 230 * cpuMeter), 76, Math.max(5, 230 * cpuMeter), 9, 4.5)
 
     // Round pips.
     const needed = engine.roundsToWin
@@ -580,7 +612,7 @@ export class FightScene extends Phaser.Scene {
 
   private buildPauseMenu(): void {
     const container = this.add.container(0, 0).setDepth(50).setVisible(false)
-    const dim = this.add.rectangle(640, 360, 1280, 720, 0x05030f, 0.72).setInteractive()
+    const dim = this.add.rectangle(640, 360, stageWidth(), 720, 0x05030f, 0.72).setInteractive()
     container.add(dim)
     const card = panel(this, 410, 170, 460, 380, {
       fill: 0x0b1026,
@@ -742,6 +774,8 @@ export class FightScene extends Phaser.Scene {
   }
 
   private cleanup(): void {
+    document.body.classList.remove('nr-fighting')
+    this.scale.off(Phaser.Scale.Events.RESIZE, this.layoutHud, this)
     window.removeEventListener('neon:orientation', this.onOrientation as EventListener)
     document.removeEventListener('visibilitychange', this.onVisibility)
     if (this.touchReveal) {
