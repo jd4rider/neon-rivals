@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta
+      name="description"
+      content="Neon Rivals \u2014 a landscape-only neon arcade fighting game. Four rivals, lightning-fast combat, one taped-up neon city. Play free in your browser."
+    />
+    <meta name="theme-color" content="#05030f" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta property="og:title" content="Neon Rivals" />
+    <meta property="og:description" content="A landscape-only neon fighting game from Little Joy Arcade." />
+    <meta property="og:type" content="website" />
+    <title>Neon Rivals \u2014 Little Joy Arcade</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        background: #05030f;
+        touch-action: none;
+        -webkit-tap-highlight-color: transparent;
+        overscroll-behavior: none;
+      }
+      #game {
+        width: 100%;
+        height: 100%;
+      }
+      #game canvas {
+        display: block;
+        touch-action: none;
+      }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <main id="game" aria-label="Neon Rivals game canvas" role="application"></main>
+    <p id="game-status" class="sr-only" aria-live="polite"></p>
+
+    <!--
+      Landscape gate. This lives above the canvas in the DOM so it also covers
+      the game when it is embedded in the Little Joy Arcade iframe. The
+      OrientationManager owns its visibility; the markup only provides styling.
+    -->
+    <div id="rotate-gate" class="rg" aria-hidden="true">
+      <div class="rg__aurora"></div>
+      <div class="rg__scan"></div>
+      <div class="rg__inner">
+        <div class="rg__logo" aria-hidden="true">NEON<span>RIVALS</span></div>
+        <div class="rg__phone" aria-hidden="true">
+          <div class="rg__phone-body">
+            <div class="rg__phone-screen">
+              <i class="rg__phone-fighter rg__phone-fighter--left"></i>
+              <i class="rg__phone-fighter rg__phone-fighter--right"></i>
+              <i class="rg__phone-flash"></i>
+            </div>
+          </div>
+          <div class="rg__phone-arc"></div>
+        </div>
+        <h1 class="rg__title">Rotate your device to play</h1>
+        <p class="rg__sub">Neon Rivals is designed for landscape play.</p>
+        <p class="rg__hint" id="rotate-gate-hint">
+          Hold your phone sideways. If the screen will not turn, enable automatic screen rotation in your device
+          settings.
+        </p>
+        <button class="rg__button" id="rotate-gate-fullscreen" type="button">Tap for fullscreen</button>
+      </div>
+    </div>
+
+    <noscript>Neon Rivals needs JavaScript enabled.</noscript>
+    <script type="module" src="/src/main.ts"></script>
+    <script src="./arcade-client.js" data-game-id="neon-rivals"></script>
+  </body>
+</html>

@@ -1,0 +1,343 @@
+:root {
+  color-scheme: dark;
+  --rg-ink: #05030f;
+  --rg-cyan: #4df3ff;
+  --rg-magenta: #ff3ea5;
+  --rg-violet: #8b5cff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 50% 0%, #120a2b 0%, #070515 55%, #05030f 100%);
+  color: #eaf2ff;
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+#game {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#game canvas {
+  display: block;
+  touch-action: none;
+}
+
+/* -------------------------------------------------------------------------
+   Landscape gate
+   ------------------------------------------------------------------------- */
+
+.rg {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right))
+    max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(139, 92, 255, 0.28), transparent 60%),
+    radial-gradient(90% 70% at 15% 100%, rgba(255, 62, 165, 0.22), transparent 65%),
+    radial-gradient(90% 70% at 85% 100%, rgba(77, 243, 255, 0.18), transparent 65%),
+    #05030f;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 260ms ease,
+    visibility 260ms ease;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.rg.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.rg__aurora {
+  position: absolute;
+  inset: -30%;
+  background:
+    conic-gradient(from 0deg at 50% 50%, rgba(77, 243, 255, 0.16), transparent 30%, rgba(255, 62, 165, 0.16) 55%, transparent 80%),
+    radial-gradient(closest-side, rgba(139, 92, 255, 0.22), transparent);
+  filter: blur(18px);
+  animation: rg-drift 14s linear infinite;
+  pointer-events: none;
+}
+
+.rg__scan {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.045) 0 1px,
+    transparent 1px 4px
+  );
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+.rg__inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  max-width: 460px;
+}
+
+.rg__logo {
+  font-family: 'Archivo Black', 'Arial Black', Impact, sans-serif;
+  font-size: clamp(22px, 6vw, 30px);
+  letter-spacing: 0.24em;
+  color: #8ff8ff;
+  text-shadow:
+    0 0 12px rgba(77, 243, 255, 0.9),
+    0 0 34px rgba(77, 243, 255, 0.45);
+  line-height: 1;
+}
+
+.rg__logo span {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.82em;
+  letter-spacing: 0.34em;
+  color: #ff86c6;
+  text-shadow:
+    0 0 12px rgba(255, 62, 165, 0.95),
+    0 0 34px rgba(255, 62, 165, 0.45);
+}
+
+/* Phone turning from portrait to landscape, then holding. */
+.rg__phone {
+  position: relative;
+  width: 86px;
+  height: 132px;
+  margin: 6px 0 2px;
+  animation: rg-rotate 4.8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+.rg__phone-body {
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  background: linear-gradient(160deg, #1b1330, #090615);
+  border: 2px solid rgba(139, 248, 255, 0.55);
+  box-shadow:
+    0 0 22px rgba(77, 243, 255, 0.35),
+    inset 0 0 18px rgba(139, 92, 255, 0.35);
+  padding: 7px;
+}
+
+.rg__phone-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(139, 92, 255, 0.55), transparent 65%),
+    linear-gradient(180deg, #0b0b24, #04030d);
+}
+
+.rg__phone-fighter {
+  position: absolute;
+  bottom: 12%;
+  width: 12%;
+  height: 34%;
+  border-radius: 4px;
+  filter: drop-shadow(0 0 6px currentColor);
+}
+
+.rg__phone-fighter--left {
+  left: 18%;
+  color: #4df3ff;
+  background: currentColor;
+  animation: rg-bounce 1.2s ease-in-out infinite;
+}
+
+.rg__phone-fighter--right {
+  right: 18%;
+  color: #ff3ea5;
+  background: currentColor;
+  animation: rg-bounce 1.2s ease-in-out infinite reverse;
+}
+
+.rg__phone-flash {
+  position: absolute;
+  left: 44%;
+  top: 44%;
+  width: 12%;
+  height: 12%;
+  border-radius: 50%;
+  background: #fff8c4;
+  box-shadow: 0 0 18px 6px rgba(255, 248, 196, 0.65);
+  animation: rg-spark 1.2s ease-out infinite;
+}
+
+.rg__phone-arc {
+  position: absolute;
+  inset: -22px -18px;
+  border-radius: 28px;
+  border: 1px dashed rgba(139, 248, 255, 0.3);
+  animation: rg-arc 4.8s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+.rg__title {
+  margin: 6px 0 0;
+  font-family: 'Archivo Black', 'Arial Black', Impact, sans-serif;
+  font-size: clamp(19px, 5.4vw, 26px);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.15;
+  color: #ffffff;
+  text-shadow:
+    0 0 18px rgba(77, 243, 255, 0.55),
+    0 2px 0 rgba(0, 0, 0, 0.4);
+}
+
+.rg__sub {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(222, 234, 255, 0.82);
+}
+
+.rg__hint {
+  margin: 2px 0 0;
+  max-width: 330px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(180, 196, 226, 0.72);
+}
+
+.rg__button {
+  margin-top: 8px;
+  padding: 11px 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(77, 243, 255, 0.55);
+  background: linear-gradient(180deg, rgba(77, 243, 255, 0.22), rgba(139, 92, 255, 0.22));
+  color: #eafcff;
+  font: 600 13px/1 'Inter', system-ui, sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  box-shadow:
+    0 0 18px rgba(77, 243, 255, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  cursor: pointer;
+  transition:
+    transform 120ms ease,
+    box-shadow 160ms ease;
+}
+
+.rg__button:active {
+  transform: scale(0.96);
+  box-shadow: 0 0 26px rgba(77, 243, 255, 0.45);
+}
+
+.rg__button[hidden] {
+  display: none;
+}
+
+@keyframes rg-rotate {
+  0%,
+  12% {
+    transform: rotate(0deg) scale(1);
+  }
+  42%,
+  64% {
+    transform: rotate(-90deg) scale(0.92);
+  }
+  88%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+@keyframes rg-arc {
+  0%,
+  12% {
+    transform: rotate(0deg);
+    opacity: 0.35;
+  }
+  42%,
+  64% {
+    transform: rotate(-90deg);
+    opacity: 0.9;
+  }
+  88%,
+  100% {
+    transform: rotate(0deg);
+    opacity: 0.35;
+  }
+}
+
+@keyframes rg-bounce {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(1);
+  }
+  45% {
+    transform: translateY(-18%) scaleY(1.06);
+  }
+}
+
+@keyframes rg-spark {
+  0% {
+    transform: scale(0.2);
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+}
+
+@keyframes rg-drift {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rg__phone,
+  .rg__phone-arc,
+  .rg__phone-fighter,
+  .rg__phone-flash,
+  .rg__aurora {
+    animation: none;
+  }
+}
+
+/* Landscape phones need the whole page to stay inside the safe area. */
+@media (orientation: landscape) and (max-height: 500px) {
+  .rg__inner {
+    gap: 6px;
+  }
+  .rg__phone {
+    width: 64px;
+    height: 100px;
+  }
+  .rg__hint {
+    display: none;
+  }
+}

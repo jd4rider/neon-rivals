@@ -1,0 +1,37 @@
+{
+  "id": "neon-rivals",
+  "name": "Neon Rivals",
+  "tagline": "Four rivals. One neon city.",
+  "description": "A landscape-only neon arcade fighter. Pick one of four rivals, then punch, launch and projectile your way through a three-fight arcade ladder or a single quick match. Combat runs on a deterministic 60 Hz engine with light and heavy attacks, a meter-fed special, dedicated guard with chip damage, combo scaling, projectile clashes, KO and timeout rounds. Full keyboard bindings work out of the box on PC, standard gamepads are supported through the browser's Gamepad API with rumble on impact, and a landscape touch pad covers phones. Neon Rivals refuses to squeeze into portrait: a polished rotation gate covers the screen, pauses the match exactly where it stands, and resumes with a countdown when the phone turns. Progress, records and settings save locally and sync through a Little Joy Arcade account when signed in.",
+  "categories": ["Arcade", "Casual"],
+  "runtime": "Phaser 3",
+  "version": "1.0.0",
+  "updated": "2026-11-10",
+  "status": "live",
+  "featured": true,
+  "playUrl": "https://jd4rider.github.io/neon-rivals/play/",
+  "siteUrl": "https://jd4rider.github.io/neon-rivals/",
+  "repoUrl": "https://github.com/jd4rider/neon-rivals",
+  "releasesUrl": "https://github.com/jd4rider/neon-rivals/releases",
+  "downloads": [],
+  "cover": { "from": "#4df3ff", "to": "#ff3ea5", "emoji": "\u26A1" },
+  "highlights": [
+    "Landscape-only by design: a polished rotation gate covers the viewport, pauses the fight and never resets a match",
+    "Deterministic 60 Hz combat engine: light, heavy, meter specials, dedicated guard, chip damage, combo scaling and projectile clashes",
+    "Four fighters with distinct speed, health, power and signature projectiles, plus three neon arenas",
+    "Arcade ladder and quick fight, best of three rounds, KO and timeout victories, perfect rounds",
+    "Native keyboard bindings out of the box and standard gamepad support with dual-rumble on impacts",
+    "Landscape touch pad with multi-touch movement, jump, attacks and guard; adjustable opacity",
+    "Procedural neon art: fighters, skyline, signage and particle effects drawn at runtime with no image downloads",
+    "Versioned, validated local saves with arcade account sync; no account required to play",
+    "Accessibility: reduced motion, screen-shake toggle, separate music and effects volume, large touch targets"
+  ],
+  "howToPlay": [
+    "Move with A/D or the arrow keys, jump with W or Up, crouch with S or Down. On a pad, use the left stick or D-pad and tap A for light, B for heavy, X for special and Y to guard.",
+    "Land light and heavy attacks to build meter and a combo. Specials spend meter and fire your rival's projectile. Guard beats an attack on the same frame but still takes chip damage.",
+    "Take two rounds to win the match. Knock an opponent's health to zero for a K.O.; if the 60-second clock runs out, the fighter with more health takes the round.",
+    "Neon Rivals is landscape-only. Rotate your phone sideways to play; rotating back pauses the match and a countdown resumes it exactly where it stopped."
+  ],
+  "levels": "4 fighters \u00b7 3 arenas \u00b7 arcade ladder + quick fight",
+  "saveKey": "neon-rivals-save-v1"
+}
