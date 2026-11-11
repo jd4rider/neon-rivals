@@ -1,4 +1,5 @@
 import Phaser from 'phaser'
+import { openTipJar } from './support'
 import { sound } from '../core/audio'
 import { ARENAS, CHARACTERS, ladderFor } from '../game/roster'
 import type { Difficulty } from '../game/types'
@@ -199,6 +200,13 @@ export class ResultsScene extends Phaser.Scene {
     label(this, 640, 688, `RIVAL: ${p1.name}  ·  ${this.result.gauntlet ? 'ARCADE' : 'QUICK FIGHT'}`, 10, '#6d82a7', {
       origin: 0.5,
       letterSpacing: 2,
+    })
+    // Quiet support link: results screen only, in the gap under the report card.
+    button(this, 640, 506, 320, 28, '☕  BUY ME A COFFEE', () => openTipJar(), {
+      fill: 0x101833,
+      accent: 0x8aa0c6,
+      size: 11,
+      radius: 12,
     })
   }
 
